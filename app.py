@@ -64,7 +64,7 @@ if st.session_state.show_form:
                 "criado_em": datetime.now().isoformat()
             }])
             updated_df = pd.concat([df, new_row], ignore_index=True)
-            conn.update(data=updated_df)
+            conn.update(data=updated_df, worksheet="Página1")
             st.session_state.show_form = False
             st.toast("Remédio salvo!", icon="✅")
             st.rerun()
