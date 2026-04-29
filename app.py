@@ -6,128 +6,142 @@ import google.generativeai as genai
 from datetime import date, datetime
 
 # --- 1. CONFIGURAÇÕES E IA ---
-st.set_page_config(page_title="Farmacinha", layout="centered")
+st.set_page_config(page_title="Farmacinha de Bolso", layout="centered")
 
-# Configuração do Gemini para a função Bula
-try:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except:
-    st.warning("IA desativada: Adicione GEMINI_API_KEY aos Secrets.")
+def get_ai_model():
+    try:
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        return genai.GenerativeModel('gemini-1.5-flash')
+    except:
+        return None
 
-# --- 2. PALETA E ESTILO PREMIUM (iPhone 16 Pro Style) ---
+model = get_ai_model()
+
+# --- 2. PALETA E ESTILO FLAT (Sem Sombras) ---
 PALETTE = {
-    "fundo": "#FDE2E4",        # Rosa Pastel Suave
-    "botao_fab": "#FB6F92",    # Rosa Vibrante
-    "card": "#FFFFFF",         # Branco Puro
-    "busca": "rgba(255, 255, 255, 0.5)", # Branco 50% Opacidade
-    "texto": "#000000",        # Preto Puro
-    "texto_sub": "#4A4A4A"     # Cinza para subtextos
+    "fundo": "#FDE2E4",        # Rosa Pastel
+    "vibrante": "#FB6F92",     # Rosa das Pills e Título
+    "branco": "#FFFFFF",
+    "preto": "#000000",
+    "cinza_linha": "rgba(0,0,0,0.05)"
 }
 
 st.markdown(f"""
     <style>
-    /* Configuração Global */
-    .stApp {{ background-color: {PALETTE['fundo']}; color: {PALETTE['texto']}; }}
+    /* Reset Global e Fundo */
+    .stApp {{ background-color: {PALETTE['fundo']}; color: {PALETTE['preto']}; }}
     
-    /* Barra de Busca Harmônica */
+    /* Título Principal no tom das Pills */
+    h1 {{ color: {PALETTE['vibrante']} !important; font-weight: 800 !important; }}
+
+    /* Título: Lista de remédios (Aumentado e Bold) */
+    .titulo-secao {{
+        font-weight: 800 !important;
+        font-size: 2.2rem !important; /* +3 tamanhos do anterior */
+        color: {PALETTE['preto']};
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }}
+
+    /* Campo de Busca (Branco, Fonte Preta, Sem Sombra) */
     .stTextInput > div > div > input {{
-        background-color: {PALETTE['busca']} !important;
+        background-color: {PALETTE['branco']} !important;
         border: 1px solid rgba(0,0,0,0.1) !important;
         border-radius: 12px !important;
-        color: {PALETTE['texto']} !important;
+        color: {PALETTE['preto']} !important;
+        box-shadow: none !important; /* Remove sombra */
     }}
 
-    /* Card Premium com Soft Shadows */
-    .remedio-card {{
-        background-color: {PALETTE['card']};
-        padding: 20px;
-        border-radius: 20px;
-        margin-bottom: 16px;
-        position: relative;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(255,255,255,0.3);
-    }}
-
-    /* Título Seção (Peso Menor) */
-    .sub-titulo {{
-        font-weight: 400;
-        font-size: 1.1rem;
-        margin: 20px 0 10px 0;
-        color: {PALETTE['texto']};
-    }}
-
-    /* Estilo Pills para Abas */
+    /* Pills Roláveis (Sem Sombras e Sem Chevron) */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 10px;
+        gap: 8px;
         display: flex;
         overflow-x: auto;
-        padding-bottom: 10px;
+        padding: 5px 0;
     }}
+    /* Esconde o Chevron/Setas das abas */
+    [data-testid="stTabs"] button [data-testid="stIcon"] {{ display: none !important; }}
+    
     .stTabs [data-baseweb="tab"] {{
-        background-color: rgba(255,255,255,0.4) !important;
-        border-radius: 50px !important;
-        padding: 8px 20px !important;
-        color: {PALETTE['texto']} !important;
+        background-color: rgba(255,255,255,0.6) !important;
+        border-radius: 25px !important;
+        padding: 8px 18px !important;
+        color: {PALETTE['preto']} !important;
         border: none !important;
+        box-shadow: none !important;
     }}
     .stTabs [aria-selected="true"] {{
-        background-color: {PALETTE['botao_fab']} !important;
+        background-color: {PALETTE['vibrante']} !important;
         color: white !important;
     }}
 
-    /* Floating Action Button (FAB) */
-    .fab-container {{
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 1000;
+    /* Listagem Simples Horizontal (Substituindo o Card) */
+    .remedio-item {{
+        background-color: transparent;
+        padding: 12px 0;
+        border-bottom: 1px solid {PALETTE['cinza_linha']};
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }}
     
-    /* Ícones e Textos */
-    .nome-remedio {{ font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; padding-right: 30px; }}
-    .cat-label {{ color: {PALETTE['texto_sub']}; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }}
+    .info-principal {{ flex: 2; }}
+    .info-dados {{ flex: 1; text-align: right; }}
+
+    .nome-texto {{ font-weight: 700; font-size: 1.1rem; color: {PALETTE['preto']}; margin: 0; }}
+    .meta-texto {{ font-size: 0.85rem; color: #555; }}
     
-    /* Ajustes Mobile vs Web */
-    @media (max-width: 768px) {{
-        .web-only {{ display: none; }}
+    /* Botões Flat (Sem Sombra) */
+    button {{
+        box-shadow: none !important;
+        border: none !important;
     }}
-    @media (min-width: 769px) {{
-        .mobile-only {{ display: none; }}
+
+    /* FAB Customizado (Sem Sombra) */
+    div[data-testid="stVerticalBlock"] > div:last-child button {{
+        position: fixed !important;
+        bottom: 30px !important;
+        right: 25px !important;
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 50% !important;
+        background-color: {PALETTE['vibrante']} !important;
+        color: white !important;
+        font-size: 30px !important;
+        z-index: 1000 !important;
+        box-shadow: none !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. LÓGICA DE DADOS (GITHUB) ---
+# --- 3. LÓGICA DE DADOS ---
 def load_data():
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["REPO_NAME"])
         content = repo.get_contents("dados_remedios.csv")
-        df = pd.read_csv(io.StringIO(content.decoded_content.decode()))
-        return df, content.sha
+        return pd.read_csv(io.StringIO(content.decoded_content.decode())), content.sha
     except:
         return pd.DataFrame(columns=["nome", "validade", "quantidade", "motivo"]), None
 
 def save_data(df, sha):
     g = Github(st.secrets["GITHUB_TOKEN"])
-    repo = g.get_repo(st.secrets["REPO_NAME"])
+    repo = g.get_repo(repo_name := st.secrets["REPO_NAME"])
     csv_data = df.to_csv(index=False)
-    if sha: repo.update_file("dados_remedios.csv", "Update", csv_data, sha)
-    else: repo.create_file("dados_remedios.csv", "Initial", csv_data)
+    if sha: g.get_repo(repo_name).update_file("dados_remedios.csv", "Update", csv_data, sha)
+    else: g.get_repo(repo_name).create_file("dados_remedios.csv", "Initial", csv_data)
 
 # --- 4. INTERFACE ---
-st.title("💊 Farmacinha de Bolso")
+st.title("Farmacinha de Bolso")
 
 df, sha = load_data()
 
-# Campo de Busca (Fundo harmônico)
-busca = st.text_input("", placeholder="🔍 Qual remédio você procura?")
+# Busca Flat
+busca = st.text_input("", placeholder="🔍 O que você está procurando?")
 
-# Subtítulo com peso menor
-st.markdown('<p class="sub-titulo">Lista de Remédios</p>', unsafe_allow_html=True)
+# Subtítulo (Grande e Bold)
+st.markdown('<p class="titulo-secao">Lista de remédios</p>', unsafe_allow_html=True)
 
-# Categorias em Pills
 categorias = ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"]
 tabs = st.tabs(categorias)
 
@@ -137,83 +151,56 @@ for idx, cat_name in enumerate(categorias):
         if busca: subset = subset[subset['nome'].str.contains(busca, case=False, na=False)]
         
         if subset.empty:
-            st.info(f"Nenhum remédio em {cat_name}.")
+            st.info(f"Nenhum item em {cat_name}.")
         else:
             for i, r in subset.iterrows():
-                # Lógica de Status
                 val_dt = datetime.strptime(r['validade'], '%Y-%m-%d').date()
                 dias = (val_dt - date.today()).days
-                status_color = "#991B1B" if dias < 0 else ("#92400E" if dias <= 30 else "#166534")
-                status_txt = "Vencido" if dias < 0 else ("Atenção" if dias <= 30 else "Em dia")
-
-                # HTML do Card
+                status_icon = "🚨" if dias < 0 else ("⚠️" if dias <= 30 else "✅")
+                
+                # Layout Horizontal de Listagem
                 st.markdown(f"""
-                    <div class="remedio-card">
-                        <div class="nome-remedio">{r['nome']}</div>
-                        <div class="cat-label">{r['motivo']}</div>
-                        <div style="color: {PALETTE['texto_sub']}; font-size: 0.85rem; margin-top: 5px;">
-                            📦 {r['quantidade']} un | 📅 {val_dt.strftime('%d/%m/%Y')}
+                    <div class="remedio-item">
+                        <div class="info-principal">
+                            <p class="nome-texto">{r['nome']}</p>
+                            <span class="meta-texto">{r['motivo']}</span>
                         </div>
-                        <div style="color: {status_color}; font-size: 0.75rem; font-weight: 700; margin-top: 4px;">
-                            {status_txt}
+                        <div class="info-dados">
+                            <div class="nome-texto">{r['quantidade']} un</div>
+                            <div class="meta-texto">{val_dt.strftime('%d/%m/%Y')} {status_icon}</div>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
 
-                # Botões de Ação dentro do Card (Grid para Mobile)
-                col_b1, col_b2, col_b3 = st.columns([1, 1, 0.5])
-                
-                # Função Bula via AI
-                with col_b1:
-                    label_bula = "📖 Bula" # Fallback
-                    if st.button(f"📖 Bula", key=f"bula_{i}", help="Consultar IA"):
-                        with st.chat_message("assistant"):
-                            with st.spinner("IA consultando bula..."):
-                                prompt = f"Resuma a bula de {r['nome']} para um paciente. Use: 1. Para que serve, 2. Como tomar, 3. Alertas."
-                                res = model.generate_content(prompt)
-                                st.write(res.text)
-                                st.caption("Informação gerada por IA. Não substitui consulta médica.")
-
-                # Ícone Lixeira (Discreto)
-                with col_b3:
-                    if st.button("🗑️", key=f"del_{i}", help="Excluir"):
+                # Ações em linha (UX: Limpeza)
+                col_bula, col_del = st.columns([1, 0.2])
+                with col_bula:
+                    if st.button(f"📖 Bula", key=f"bula_{i}", use_container_width=False):
+                        if model:
+                            with st.spinner("Consultando IA..."):
+                                res = model.generate_content(f"Resuma a bula de {r['nome']}: Indicação, Uso e Alerta.")
+                                st.success(res.text)
+                        else:
+                            st.error("IA não configurada.")
+                with col_del:
+                    if st.button("🗑️", key=f"del_{i}"):
                         df = df.drop(i)
                         save_data(df, sha)
                         st.rerun()
 
-# --- 5. FLOATING ACTION BUTTON (FAB) ---
-# Em Streamlit, o FAB é injetado via CSS no botão fixo
-st.markdown('<div class="fab-container">', unsafe_allow_html=True)
-if st.button("＋", key="fab_incluir", help="Incluir novo remédio"):
+# --- 5. FAB E FORMULÁRIO ---
+if st.button("＋", key="fab_main"):
     st.session_state.show_form = True
-st.markdown('</div>', unsafe_allow_html=True)
 
-# Estilo específico para o FAB (Botão Circular)
-st.markdown("""
-    <style>
-    div[data-testid="stVerticalBlock"] > div:last-child button {
-        border-radius: 50% !important;
-        width: 60px !important;
-        height: 60px !important;
-        background-color: #FB6F92 !important;
-        color: white !important;
-        font-size: 30px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        border: none !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Formulário Suspenso (Modo Incluir)
 if st.session_state.get("show_form"):
-    with st.expander("📝 Cadastrar Medicamento", expanded=True):
-        with st.form("form_add", clear_on_submit=True):
-            nome = st.text_input("Nome")
+    with st.expander("📝 Adicionar Novo", expanded=True):
+        with st.form("add_form", clear_on_submit=True):
+            nome = st.text_input("Nome do medicamento")
             c1, c2 = st.columns(2)
             val = c1.date_input("Vencimento")
             qtd = c2.number_input("Qtd", min_value=1)
             cat = st.selectbox("Categoria", categorias)
-            if st.form_submit_button("Salvar"):
+            if st.form_submit_button("Salvar na Lista"):
                 new_item = pd.DataFrame([{"nome": nome, "validade": str(val), "quantidade": int(qtd), "motivo": cat}])
                 df = pd.concat([df, new_item], ignore_index=True)
                 save_data(df, sha)
