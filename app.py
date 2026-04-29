@@ -5,7 +5,7 @@ import io
 import google.generativeai as genai
 from datetime import date, datetime
 
-# --- 1. CONFIGURAÇÕES INICIAIS ---
+# --- 1. CONFIGURAÇÕES E IA ---
 st.set_page_config(page_title="Farmacinha de Bolso", layout="wide")
 
 def get_ai_model():
@@ -16,15 +16,12 @@ def get_ai_model():
 
 model = get_ai_model()
 
-# --- 2. ESTILO E PALETA DE CORES (Pink & Flat) ---
+# --- 2. ESTILO E PALETA CROMÁTICA UNIFICADA ---
 COLORS = {
-    "fundo": "#FDE2E4",
-    "vibrante": "#FB6F92",
+    "fundo": "#FDE2E4",      # Rosa Pastel
+    "vibrante": "#FB6F92",   # Rosa de Ação (Pills, Botões, Inputs)
     "branco": "#FFFFFF",
-    "preto": "#000000",
-    "status_vencido": "#991B1B",
-    "status_atencao": "#92400E",
-    "status_em_dia": "#166534"
+    "preto": "#000000"
 }
 
 st.markdown(f"""
@@ -33,46 +30,45 @@ st.markdown(f"""
     .stApp {{ background-color: {COLORS['fundo']}; color: {COLORS['preto']}; }}
     h1 {{ color: {COLORS['vibrante']} !important; font-weight: 800 !important; }}
     
-    /* Título Secundário */
-    .titulo-lista {{
-        font-weight: 600;
-        font-size: 1.6rem;
-        color: {COLORS['preto']};
-        margin-top: 30px;
+    /* Pergunta da Busca e Labels em Preto */
+    label, .stMarkdown p, .titulo-lista {{
+        color: {COLORS['preto']} !important;
+        font-weight: 600 !important;
     }}
 
-    /* Input de Busca e Campos do Formulário */
-    .stTextInput input, .stNumberInput input, .stSelectbox select, .stDateInput input {{
-        background-color: {COLORS['branco']} !important;
-        color: {COLORS['preto']} !important;
+    /* Inputs (Busca, Número, Seleção, Data) na cor Rosa Vibrante */
+    .stTextInput input, .stNumberInput input, .stSelectbox [data-baseweb="select"], .stDateInput input {{
+        background-color: {COLORS['vibrante']} !important;
+        color: white !important;
         border: none !important;
         border-radius: 12px !important;
         box-shadow: none !important;
     }}
-    
-    /* Remoção de bordas pretas de foco */
-    .stTextInput input:focus, .stSelectbox div:focus {{
-        border: none !important;
-        outline: none !important;
-    }}
 
-    /* Pills e Tabs (Sem Chevron) */
+    /* Estilo específico para o texto dentro dos inputs para garantir cor branca */
+    input {{ color: white !important; }}
+    div[role="listbox"] {{ color: {COLORS['preto']} !important; }} /* Lista de opções em preto para ler melhor */
+
+    /* Placeholder da busca em branco translúcido */
+    input::placeholder {{ color: rgba(255, 255, 255, 0.7) !important; }}
+
+    /* Pills/Tabs (Todas em Rosa, Texto Branco) */
     .stTabs [data-baseweb="tab-list"] {{ gap: 10px; border: none !important; }}
     .stTabs [data-baseweb="tab"] {{
-        background-color: rgba(255,255,255,0.4) !important;
+        background-color: {COLORS['vibrante']} !important;
         border-radius: 50px !important;
         padding: 8px 20px !important;
-        color: {COLORS['preto']} !important;
+        color: white !important;
         border: none !important;
+        opacity: 0.7; /* Efeito de 'recolhida' */
+    }}
+    .stTabs [aria-selected="true"] {{
+        opacity: 1 !important;
+        font-weight: 700 !important;
     }}
     [data-testid="stIcon"] {{ display: none !important; }} /* Remove setas/chevrons */
-    
-    .stTabs [aria-selected="true"] {{
-        background-color: {COLORS['vibrante']} !important;
-        color: white !important;
-    }}
 
-    /* Botão Principal e do Formulário */
+    /* Botões (Incluir, Salvar, Ícones) */
     .stButton > button {{
         background-color: {COLORS['vibrante']} !important;
         color: white !important;
@@ -82,7 +78,7 @@ st.markdown(f"""
         box-shadow: none !important;
     }}
 
-    /* Cabeçalho da Listagem */
+    /* Tabela Invisível */
     .label-col {{
         font-weight: 700;
         font-size: 0.75rem;
@@ -95,7 +91,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. LÓGICA DE DADOS (GITHUB) ---
+# --- 3. LÓGICA DE DADOS ---
 def load_data():
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
@@ -118,7 +114,7 @@ st.title("💊 Farmacinha de Bolso")
 
 df, sha = load_data()
 
-# Ação de Entrada: Botão no topo
+# Ação de Entrada
 if st.button("➕ Incluir remédio", use_container_width=True):
     st.session_state.show_form = True
 
@@ -133,19 +129,18 @@ if st.session_state.get("show_form"):
             
             if st.form_submit_button("Salvar remédio"):
                 new_row = {"nome": nome_f, "validade": str(val_f), "quantidade": int(qtd_f), "motivo": cat_f}
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df = pd.concat([df, new_row if isinstance(new_row, pd.DataFrame) else pd.DataFrame([new_row])], ignore_index=True)
                 save_data(df, sha, "Remédio salvo!")
                 st.session_state.show_form = False
                 st.rerun()
 
 st.divider()
 
-# Busca
+# Busca com Label em Preto
 busca = st.text_input("Qual remédio você procura?", placeholder="Digite o nome...")
 
 st.markdown('<p class="titulo-lista">Lista de remédios</p>', unsafe_allow_html=True)
 
-# Tabs/Categorias
 categorias = ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"]
 tabs = st.tabs(categorias)
 
@@ -157,7 +152,7 @@ for idx, cat_name in enumerate(categorias):
         if subset.empty:
             st.info(f"Nenhum remédio em {cat_name}.")
         else:
-            # Cabeçalho da Listagem (Tabela Invisível)
+            # Cabeçalho
             h1, h2, h3, h4, h5 = st.columns([2, 1.5, 1, 1.5, 1.5])
             h1.markdown('<div class="label-col">Nome</div>', unsafe_allow_html=True)
             h2.markdown('<div class="label-col">Motivo</div>', unsafe_allow_html=True)
@@ -167,37 +162,26 @@ for idx, cat_name in enumerate(categorias):
 
             for i, r in subset.iterrows():
                 row = st.columns([2, 1.5, 1, 1.5, 1.5])
-                
-                # Dados
                 row[0].write(f"**{r['nome']}**")
                 row[1].write(r['motivo'])
                 row[2].write(f"{r['quantidade']} un")
                 
-                # Status de Validade
                 dt = datetime.strptime(r['validade'], '%Y-%m-%d').date()
-                dias = (dt - date.today()).days
-                if dias < 0:
-                    status_txt, status_color = "Vencido 🚨", COLORS['status_vencido']
-                elif dias <= 30:
-                    status_txt, status_color = "Atenção ⚠️", COLORS['status_atencao']
-                else:
-                    status_txt, status_color = "Em dia", COLORS['status_em_dia']
-                
-                row[3].markdown(f"<span style='color:{status_color}; font-weight:600;'>{dt.strftime('%d/%m/%Y')}<br><small>{status_txt}</small></span>", unsafe_allow_html=True)
+                row[3].write(dt.strftime('%d/%m/%Y'))
 
-                # Ações
                 actions = row[4].columns(3)
-                if actions[0].button("📓", key=f"bula_{i}", help="Bula"):
+                if actions[0].button("📓", key=f"bula_{i}"):
                     if model:
                         with st.spinner("Consultando..."):
-                            res = model.generate_content(f"Resuma a bula de {r['nome']}: indicação e como tomar.")
+                            res = model.generate_content(f"Resuma a bula de {r['nome']}: indicação e uso.")
                             st.info(res.text)
                 
-                if actions[1].button("✏️", key=f"edit_{i}", help="Editar"):
+                if actions[1].button("✏️", key=f"edit_{i}"):
                     st.session_state.edit_item = i
-                    st.session_state.show_form = True # Reaproveita o fluxo
+                    st.session_state.show_form = True
+                    st.rerun()
                 
-                if actions[2].button("🗑️", key=f"del_{i}", help="Excluir"):
+                if actions[2].button("🗑️", key=f"del_{i}"):
                     df = df.drop(i)
                     save_data(df, sha, "Excluído!")
                     st.rerun()
