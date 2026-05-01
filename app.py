@@ -16,92 +16,85 @@ def get_ai_model():
 
 model = get_ai_model()
 
-# --- 2. PALETA MATCHA & CREAM (TOTAL FLAT) ---
+# --- 2. PALETA ZEN PREMIUM (ESTILO MATCHA) ---
 COLORS = {
     "fundo": "#F9F7F2",       # Creme Papel
-    "matcha": "#587058",      # Verde Matcha (Ações)
+    "matcha": "#587058",      # Verde Matcha (Interativos)
     "areia": "#E8D5C4",       # Bege Areia (Secundários)
-    "grafite": "#2C2C2C",     # Texto Principal
+    "grafite": "#2C2C2C",     # Texto
     "branco": "#FFFFFF",
-    "status_vencido": "#A64B4B", 
-    "status_atencao": "#C49A6C"
+    "preto": "#000000"
 }
 
 st.markdown(f"""
     <style>
-    /* Configurações Globais */
+    /* Reset Global */
     .stApp {{ background-color: {COLORS['fundo']}; color: {COLORS['grafite']}; }}
-    
-    /* Título do App */
     h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
 
-    /* Título Secundário (Lista de remédios) */
-    .titulo-lista {{ 
-        font-weight: 600; 
-        font-size: 1.4rem; 
-        color: {COLORS['grafite']}; 
-        margin: 25px 0 10px 0; 
+    /* 1. ABA RECOLHIDA (EXPANDER) VERDE MATCHA */
+    .stExpander {{
+        background-color: {COLORS['matcha']} !important;
+        border: none !important;
+        border-radius: 12px !important;
+    }}
+    .stExpander [data-testid="stExpanderSummary"] {{
+        color: white !important;
+    }}
+    .stExpander [data-testid="stExpanderSummary"] svg {{
+        fill: white !important;
     }}
 
-    /* Inputs e Busca (Matcha Style) */
-    .stTextInput input, .stNumberInput input, .stSelectbox [data-baseweb="select"], .stDateInput input {{
-        background-color: {COLORS['branco']} !important;
-        color: {COLORS['grafite']} !important;
-        border: 1px solid {COLORS['areia']} !important;
-        border-radius: 12px !important;
-        box-shadow: none !important;
+    /* 2. CAMPOS DE ENTRADA (Cadastro) VERDE MATCHA */
+    /* Input de Texto, Data, Seleção e Número */
+    .stTextInput input, .stDateInput input, .stSelectbox [data-baseweb="select"], .stNumberInput input {{
+        background-color: {COLORS['matcha']} !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+    }}
+
+    /* Placeholder do Nome do Remédio (Forçando visibilidade) */
+    .stTextInput input::placeholder {{
+        color: {COLORS['preto']} !important;
+        opacity: 0.8;
+    }}
+
+    /* 3. CALENDÁRIO E BOTÕES DE +/- VERDE MATCHA */
+    /* Ajuste para botões de incremento do Number Input */
+    .stNumberInput button {{
+        background-color: {COLORS['matcha']} !important;
+        color: white !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
     }}
     
-    /* Remove bordas de foco */
-    input:focus {{ border: 1px solid {COLORS['matcha']} !important; outline: none !important; }}
+    /* 4. BOTÃO SALVAR REMÉDIO VERDE MATCHA */
+    form .stButton > button {{
+        background-color: {COLORS['matcha']} !important;
+        color: white !important;
+        width: 100% !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        margin-top: 10px;
+    }}
 
-    /* Pills (Abas) */
-    .stTabs [data-baseweb="tab-list"] {{ gap: 10px; border: none !important; }}
+    /* Títulos e Labels */
+    label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 700; }}
+
+    /* Pills / Tabs */
+    .stTabs [data-baseweb="tab-list"] {{ gap: 10px; }}
     .stTabs [data-baseweb="tab"] {{
         background-color: {COLORS['areia']} !important;
         border-radius: 50px !important;
-        padding: 8px 20px !important;
         color: {COLORS['grafite']} !important;
-        border: none !important;
-        opacity: 0.7;
     }}
     .stTabs [aria-selected="true"] {{
         background-color: {COLORS['matcha']} !important;
         color: white !important;
-        opacity: 1 !important;
-    }}
-    [data-testid="stIcon"] {{ display: none !important; }}
-
-    /* Botão Principal Matcha */
-    .stButton > button {{
-        background-color: {COLORS['matcha']} !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
     }}
 
-    /* Estado Vazio (Transparente e Grafite) */
-    .empty-state {{
-        color: {COLORS['grafite']};
-        opacity: 0.5;
-        font-style: italic;
-        padding: 40px 0;
-        text-align: center;
-        background: transparent !important;
-    }}
-
-    /* Cabeçalho da Listagem */
-    .label-col {{
-        font-weight: 700;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        color: {COLORS['grafite']};
-        opacity: 0.4;
-        border-bottom: 1px solid {COLORS['areia']};
-        padding-bottom: 8px;
-    }}
+    /* Estado Vazio */
+    .empty-state {{ color: {COLORS['grafite']}; opacity: 0.4; text-align: center; padding: 30px; }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -128,19 +121,25 @@ st.title("💊 Farmacinha de Bolso")
 
 df, sha = load_data()
 
-# Incluir remédio no topo
+# Botão de inclusão (Topo)
 if st.button("➕ Incluir remédio", use_container_width=True):
     st.session_state.show_form = True
 
+# JORNADA DE CADASTRO
 if st.session_state.get("show_form"):
     with st.expander("📝 Novo Cadastro", expanded=True):
         with st.form("form_cadastro", clear_on_submit=True):
-            nome_f = st.text_input("Nome do medicamento")
+            # Campo Nome com Placeholder solicitado
+            nome_f = st.text_input("Nome do medicamento", placeholder="Digite o nome do seu remédio")
+            
             c1, c2 = st.columns(2)
-            val_f = c1.date_input("Vencimento")
-            qtd_f = c2.number_input("Quantidade", min_value=1, step=1)
+            val_f = c1.date_input("Vencimento") # Calendário agora herdará o estilo Matcha
+            qtd_f = c2.number_input("Quantidade", min_value=1, step=1) # Botões +/- agora Matcha
+            
+            # Selectbox agora Matcha
             cat_f = st.selectbox("Motivo (Categoria)", ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"])
             
+            # Botão Salvar Verde Matcha
             if st.form_submit_button("Salvar remédio"):
                 new_row = {"nome": nome_f, "validade": str(val_f), "quantidade": int(qtd_f), "motivo": cat_f}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -150,7 +149,7 @@ if st.session_state.get("show_form"):
 
 st.divider()
 
-# Busca (Label Grafite)
+# Busca
 busca = st.text_input("Qual remédio você procura?", placeholder="Digite o nome...")
 
 st.markdown('<p class="titulo-lista">Lista de remédios</p>', unsafe_allow_html=True)
@@ -164,16 +163,12 @@ for idx, cat_name in enumerate(categorias):
         if busca: subset = subset[subset['nome'].str.contains(busca, case=False, na=False)]
         
         if subset.empty:
-            # AQUI: O novo placeholder de estado vazio, transparente e grafite
             st.markdown(f'<div class="empty-state">Nenhum remédio em {cat_name}.</div>', unsafe_allow_html=True)
         else:
             # Cabeçalho da Listagem
             h1, h2, h3, h4, h5 = st.columns([2.5, 1.5, 1, 1.5, 1.5])
-            h1.markdown('<div class="label-col">Medicamento</div>', unsafe_allow_html=True)
-            h2.markdown('<div class="label-col">Categoria</div>', unsafe_allow_html=True)
-            h3.markdown('<div class="label-col">Estoque</div>', unsafe_allow_html=True)
-            h4.markdown('<div class="label-col">Validade</div>', unsafe_allow_html=True)
-            h5.markdown('<div class="label-col">Ações</div>', unsafe_allow_html=True)
+            for h, title in zip([h1, h2, h3, h4, h5], ["Medicamento", "Categoria", "Estoque", "Validade", "Ações"]):
+                h.markdown(f'<div style="font-size:0.7rem; font-weight:700; opacity:0.5; text-transform:uppercase;">{title}</div>', unsafe_allow_html=True)
 
             for i, r in subset.iterrows():
                 row = st.columns([2.5, 1.5, 1, 1.5, 1.5])
@@ -181,17 +176,13 @@ for idx, cat_name in enumerate(categorias):
                 row[1].write(r['motivo'])
                 row[2].write(f"{r['quantidade']} un")
                 
-                # Validade
                 dt = datetime.strptime(r['validade'], '%Y-%m-%d').date()
-                dias = (dt - date.today()).days
-                status_color = COLORS['status_vencido'] if dias < 0 else (COLORS['status_atencao'] if dias <= 30 else COLORS['grafite'])
-                row[3].markdown(f"<span style='color:{status_color}; font-weight:600;'>{dt.strftime('%d/%m/%Y')}</span>", unsafe_allow_html=True)
+                row[3].write(dt.strftime('%d/%m/%Y'))
 
-                # Ações
                 acts = row[4].columns(3)
                 if acts[0].button("📓", key=f"bula_{i}"):
                     if model:
-                        with st.spinner("IA..."):
+                        with st.spinner("Consultando..."):
                             res = model.generate_content(f"Resuma a bula de {r['nome']}.")
                             st.info(res.text)
                 
