@@ -11,7 +11,7 @@ st.set_page_config(page_title="Farmacinha de Bolso", layout="wide")
 def get_ai_model():
     try:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        return genai.GenerativeModel('gemini-1.5-flash')
+        return genai.GenerativeModel('gemini-2.0-flash')
     except:
         return None
 
