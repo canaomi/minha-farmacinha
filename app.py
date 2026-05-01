@@ -37,37 +37,39 @@ st.markdown(f"""
     }}
 
     /* ── TIPOGRAFIA ───────────────────────────────── */
-    h1 {{
-        color: {COLORS['matcha']} !important;
-        font-weight: 800 !important;
-    }}
-    label, .titulo-lista {{
-        color: {COLORS['grafite']} !important;
-        font-weight: 600;
-    }}
+    h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
+    label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 600; }}
 
-    /* ── EXPANDER (FORMULÁRIO DE CADASTRO) ────────── */
-    /* Fundo creme para não pesar */
-    .stExpander {{
+    /* ── EXPANDER: MATA O PRETO NO HEADER ─────────── */
+    /* Seletores em cascata para cobrir todas as versões do Streamlit */
+    [data-testid="stExpander"] {{
         background-color: {COLORS['fundo']} !important;
         border: 1.5px solid {COLORS['areia']} !important;
         border-radius: 14px !important;
         box-shadow: none !important;
     }}
-    .stExpander [data-testid="stExpanderSummary"] {{
-        color: {COLORS['grafite']} !important;
-        font-weight: 600;
+    [data-testid="stExpander"] > details {{
+        background-color: {COLORS['fundo']} !important;
+        border-radius: 14px !important;
     }}
-    .stExpander [data-testid="stExpanderSummary"] svg {{
+    [data-testid="stExpander"] > details > summary {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
+    }}
+    [data-testid="stExpander"] > details > summary:hover {{
+        background-color: {COLORS['matcha_claro']} !important;
+    }}
+    [data-testid="stExpander"] > details > summary svg {{
         fill: {COLORS['matcha']} !important;
     }}
-    /* Conteúdo interno do expander também creme */
-    .stExpander [data-testid="stExpanderDetails"] {{
+    [data-testid="stExpanderDetails"] {{
         background-color: {COLORS['fundo']} !important;
+        border-radius: 0 0 14px 14px !important;
     }}
 
     /* ── CAMPOS DE ENTRADA ────────────────────────── */
-    /* Fundo AREIA + texto GRAFITE = legível e harmonioso */
     .stTextInput input,
     .stNumberInput input,
     .stDateInput input {{
@@ -77,14 +79,12 @@ st.markdown(f"""
         border-radius: 10px !important;
         caret-color: {COLORS['matcha']};
     }}
-    /* Placeholder: grafite suavizado (acessível) */
     .stTextInput input::placeholder,
     .stNumberInput input::placeholder,
     .stDateInput input::placeholder {{
         color: {COLORS['grafite']} !important;
         opacity: 0.45;
     }}
-    /* Focus ring: matcha sutil */
     .stTextInput input:focus,
     .stNumberInput input:focus,
     .stDateInput input:focus {{
@@ -100,7 +100,6 @@ st.markdown(f"""
         border: 1.5px solid transparent !important;
         border-radius: 10px !important;
     }}
-    /* Dropdown do selectbox */
     [data-baseweb="popover"] [data-baseweb="menu"] {{
         background-color: {COLORS['fundo']} !important;
         border: 1px solid {COLORS['areia']} !important;
@@ -108,6 +107,7 @@ st.markdown(f"""
     }}
     [data-baseweb="popover"] [role="option"] {{
         color: {COLORS['grafite']} !important;
+        background-color: {COLORS['fundo']} !important;
     }}
     [data-baseweb="popover"] [role="option"]:hover,
     [data-baseweb="popover"] [aria-selected="true"] {{
@@ -128,49 +128,42 @@ st.markdown(f"""
         color: {COLORS['branco']} !important;
     }}
 
-    /* ── BOTÃO SALVAR (PRIMÁRIO) ──────────────────── */
-    form .stButton > button,
-    form .stButton > button:hover {{
+    /* ── TODOS OS BOTÕES: BASE MATCHA ─────────────── */
+    /* Seletor universal — pega Salvar, Incluir e ações */
+    .stButton > button {{
         background-color: {COLORS['matcha']} !important;
         color: {COLORS['branco']} !important;
-        width: 100% !important;
+        border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        border: none !important;
-        padding: 0.6rem 0 !important;
         transition: opacity 0.2s ease;
     }}
-    form .stButton > button:hover {{
-        opacity: 0.88;
+    .stButton > button:hover {{
+        opacity: 0.85 !important;
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
     }}
 
-    /* ── BOTÃO "INCLUIR REMÉDIO" (SECUNDÁRIO) ─────── */
-    /* Fora do form — contorno matcha, fundo creme */
-    [data-testid="stBaseButton-secondary"],
-    div:not(form) > div > .stButton > button {{
+    /* ── BOTÃO "INCLUIR REMÉDIO": ESTILO SECUNDÁRIO ── */
+    /* Sobrescreve apenas o botão de largura total fora do form */
+    [data-testid="stBaseButton-secondary"] {{
         background-color: {COLORS['fundo']} !important;
         color: {COLORS['matcha']} !important;
         border: 1.5px solid {COLORS['matcha']} !important;
-        border-radius: 12px !important;
-        font-weight: 700 !important;
     }}
-    div:not(form) > div > .stButton > button:hover {{
+    [data-testid="stBaseButton-secondary"]:hover {{
         background-color: {COLORS['matcha_claro']} !important;
     }}
 
     /* ── TABS / PILLS ─────────────────────────────── */
-    /* Scroll horizontal sem chevrons */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 8px;
         overflow-x: auto;
         flex-wrap: nowrap;
         padding-bottom: 4px;
-        scrollbar-width: none;       /* Firefox */
+        scrollbar-width: none;
     }}
-    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{
-        display: none;               /* Chrome/Safari */
-    }}
-    /* Pill inativa */
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none; }}
     .stTabs [data-baseweb="tab"] {{
         background-color: {COLORS['areia']} !important;
         color: {COLORS['grafite']} !important;
@@ -180,25 +173,15 @@ st.markdown(f"""
         white-space: nowrap;
         padding: 6px 16px !important;
     }}
-    /* Pill ativa */
     .stTabs [aria-selected="true"] {{
         background-color: {COLORS['matcha']} !important;
         color: {COLORS['branco']} !important;
     }}
-    /* Remove indicador de linha padrão do Streamlit */
-    .stTabs [data-baseweb="tab-highlight"] {{
-        display: none !important;
-    }}
-    /* Oculta ícones de chevron das tabs */
-    [data-testid="stIcon"] {{
-        display: none !important;
-    }}
+    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
+    [data-testid="stIcon"] {{ display: none !important; }}
 
     /* ── DIVIDER ──────────────────────────────────── */
-    hr {{
-        border-color: {COLORS['areia']} !important;
-        opacity: 0.6;
-    }}
+    hr {{ border-color: {COLORS['areia']} !important; opacity: 0.6; }}
 
     /* ── ESTADO VAZIO ─────────────────────────────── */
     .empty-state {{
