@@ -30,6 +30,7 @@ COLORS = {
 st.markdown(f"""
     <style>
     /* ── RESET GLOBAL ─────────────────────────────── */
+    * {{ box-sizing: border-box; }}
     .stApp {{
         background-color: {COLORS['fundo']};
         color: {COLORS['grafite']};
@@ -40,8 +41,46 @@ st.markdown(f"""
     h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
     label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 600; }}
 
-    /* ── EXPANDER: MATA O PRETO NO HEADER ─────────── */
-    /* Seletores em cascata para cobrir todas as versões do Streamlit */
+    /* ══════════════════════════════════════════════
+       BOTÕES — TODOS OS ESTADOS (normal/hover/focus/active)
+    ══════════════════════════════════════════════ */
+    .stButton > button,
+    .stButton > button:hover,
+    .stButton > button:focus,
+    .stButton > button:active,
+    .stButton > button:focus-visible,
+    .stButton > button:focus:not(:active) {{
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }}
+    .stButton > button:hover {{ opacity: 0.88 !important; }}
+    .stButton > button:active {{ opacity: 0.75 !important; }}
+
+    /* ── BOTÃO "INCLUIR REMÉDIO": SECUNDÁRIO ──────── */
+    [data-testid="stBaseButton-secondary"],
+    [data-testid="stBaseButton-secondary"]:hover,
+    [data-testid="stBaseButton-secondary"]:focus,
+    [data-testid="stBaseButton-secondary"]:active,
+    [data-testid="stBaseButton-secondary"]:focus-visible {{
+        background-color: {COLORS['fundo']} !important;
+        color: {COLORS['matcha']} !important;
+        border: 1.5px solid {COLORS['matcha']} !important;
+        outline: none !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+    }}
+    [data-testid="stBaseButton-secondary"]:hover {{
+        background-color: {COLORS['matcha_claro']} !important;
+    }}
+
+    /* ══════════════════════════════════════════════
+       EXPANDER — MATA O PRETO NO HEADER
+    ══════════════════════════════════════════════ */
     [data-testid="stExpander"] {{
         background-color: {COLORS['fundo']} !important;
         border: 1.5px solid {COLORS['areia']} !important;
@@ -57,6 +96,8 @@ st.markdown(f"""
         color: {COLORS['grafite']} !important;
         border-radius: 12px !important;
         padding: 10px 14px !important;
+        outline: none !important;          /* Remove foco preto no summary */
+        box-shadow: none !important;
     }}
     [data-testid="stExpander"] > details > summary:hover {{
         background-color: {COLORS['matcha_claro']} !important;
@@ -69,15 +110,38 @@ st.markdown(f"""
         border-radius: 0 0 14px 14px !important;
     }}
 
-    /* ── CAMPOS DE ENTRADA ────────────────────────── */
+    /* ══════════════════════════════════════════════
+       CAMPOS DE ENTRADA — TODOS OS ESTADOS
+       Remove outline/box-shadow preto do browser e Streamlit
+    ══════════════════════════════════════════════ */
     .stTextInput input,
     .stNumberInput input,
-    .stDateInput input {{
+    .stDateInput input,
+    .stTextInput input:hover,
+    .stNumberInput input:hover,
+    .stDateInput input:hover,
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stDateInput input:focus,
+    .stTextInput input:active,
+    .stNumberInput input:active,
+    .stDateInput input:active,
+    .stTextInput input:focus-visible,
+    .stNumberInput input:focus-visible,
+    .stDateInput input:focus-visible {{
         background-color: {COLORS['areia']} !important;
         color: {COLORS['grafite']} !important;
         border: 1.5px solid transparent !important;
         border-radius: 10px !important;
+        outline: none !important;
+        box-shadow: none !important;
         caret-color: {COLORS['matcha']};
+    }}
+    /* Focus ring suave só com a borda matcha */
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stDateInput input:focus {{
+        border-color: {COLORS['matcha']} !important;
     }}
     .stTextInput input::placeholder,
     .stNumberInput input::placeholder,
@@ -85,25 +149,46 @@ st.markdown(f"""
         color: {COLORS['grafite']} !important;
         opacity: 0.45;
     }}
-    .stTextInput input:focus,
-    .stNumberInput input:focus,
-    .stDateInput input:focus {{
-        border-color: {COLORS['matcha']} !important;
-        box-shadow: 0 0 0 3px rgba(88,112,88,0.15) !important;
+
+    /* ── WRAPPER DOS INPUTS (borda externa do Streamlit) */
+    [data-testid="stTextInput"] > div,
+    [data-testid="stNumberInput"] > div,
+    [data-testid="stDateInput"] > div,
+    [data-testid="stTextInput"] > div:focus-within,
+    [data-testid="stNumberInput"] > div:focus-within,
+    [data-testid="stDateInput"] > div:focus-within {{
+        border: none !important;
         outline: none !important;
+        box-shadow: none !important;
+        background-color: transparent !important;
     }}
 
-    /* ── SELECTBOX ────────────────────────────────── */
-    .stSelectbox [data-baseweb="select"] > div {{
+    /* ══════════════════════════════════════════════
+       SELECTBOX — TODOS OS ESTADOS
+    ══════════════════════════════════════════════ */
+    .stSelectbox [data-baseweb="select"] > div,
+    .stSelectbox [data-baseweb="select"] > div:hover,
+    .stSelectbox [data-baseweb="select"] > div:focus,
+    .stSelectbox [data-baseweb="select"] > div:focus-within {{
         background-color: {COLORS['areia']} !important;
         color: {COLORS['grafite']} !important;
         border: 1.5px solid transparent !important;
         border-radius: 10px !important;
+        outline: none !important;
+        box-shadow: none !important;
     }}
+    /* Container pai do selectbox */
+    [data-testid="stSelectbox"] > div:focus-within {{
+        outline: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }}
+    /* Dropdown aberto */
     [data-baseweb="popover"] [data-baseweb="menu"] {{
         background-color: {COLORS['fundo']} !important;
         border: 1px solid {COLORS['areia']} !important;
         border-radius: 10px !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
     }}
     [data-baseweb="popover"] [role="option"] {{
         color: {COLORS['grafite']} !important;
@@ -117,10 +202,15 @@ st.markdown(f"""
     }}
 
     /* ── BOTÕES +/- DO NUMBER INPUT ───────────────── */
-    .stNumberInput button {{
+    .stNumberInput button,
+    .stNumberInput button:hover,
+    .stNumberInput button:focus,
+    .stNumberInput button:active {{
         background-color: {COLORS['areia']} !important;
         color: {COLORS['grafite']} !important;
         border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
         border-radius: 8px !important;
     }}
     .stNumberInput button:hover {{
@@ -128,34 +218,9 @@ st.markdown(f"""
         color: {COLORS['branco']} !important;
     }}
 
-    /* ── TODOS OS BOTÕES: BASE MATCHA ─────────────── */
-    /* Seletor universal — pega Salvar, Incluir e ações */
-    .stButton > button {{
-        background-color: {COLORS['matcha']} !important;
-        color: {COLORS['branco']} !important;
-        border: none !important;
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-        transition: opacity 0.2s ease;
-    }}
-    .stButton > button:hover {{
-        opacity: 0.85 !important;
-        background-color: {COLORS['matcha']} !important;
-        color: {COLORS['branco']} !important;
-    }}
-
-    /* ── BOTÃO "INCLUIR REMÉDIO": ESTILO SECUNDÁRIO ── */
-    /* Sobrescreve apenas o botão de largura total fora do form */
-    [data-testid="stBaseButton-secondary"] {{
-        background-color: {COLORS['fundo']} !important;
-        color: {COLORS['matcha']} !important;
-        border: 1.5px solid {COLORS['matcha']} !important;
-    }}
-    [data-testid="stBaseButton-secondary"]:hover {{
-        background-color: {COLORS['matcha_claro']} !important;
-    }}
-
-    /* ── TABS / PILLS ─────────────────────────────── */
+    /* ══════════════════════════════════════════════
+       TABS / PILLS
+    ══════════════════════════════════════════════ */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 8px;
         overflow-x: auto;
@@ -164,11 +229,15 @@ st.markdown(f"""
         scrollbar-width: none;
     }}
     .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none; }}
-    .stTabs [data-baseweb="tab"] {{
+    .stTabs [data-baseweb="tab"],
+    .stTabs [data-baseweb="tab"]:focus,
+    .stTabs [data-baseweb="tab"]:focus-visible {{
         background-color: {COLORS['areia']} !important;
         color: {COLORS['grafite']} !important;
         border-radius: 50px !important;
         border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
         font-weight: 600;
         white-space: nowrap;
         padding: 6px 16px !important;
@@ -178,6 +247,7 @@ st.markdown(f"""
         color: {COLORS['branco']} !important;
     }}
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
+    .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     [data-testid="stIcon"] {{ display: none !important; }}
 
     /* ── DIVIDER ──────────────────────────────────── */
