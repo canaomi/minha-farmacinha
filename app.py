@@ -16,11 +16,11 @@ def get_ai_model():
 
 model = get_ai_model()
 
-# --- 2. PALETA ZEN PREMIUM (ESTILO MATCHA) ---
+# --- 2. PALETA ZEN (MATCH & CREAM) ---
 COLORS = {
-    "fundo": "#F9F7F2",       # Creme Papel
-    "matcha": "#587058",      # Verde Matcha (Interativos)
-    "areia": "#E8D5C4",       # Bege Areia (Secundários)
+    "fundo": "#F9F7F2",       # Creme Papel (Original)
+    "matcha": "#587058",      # Verde Matcha
+    "areia": "#E8D5C4",       # Bege Areia
     "grafite": "#2C2C2C",     # Texto
     "branco": "#FFFFFF",
     "preto": "#000000"
@@ -32,21 +32,21 @@ st.markdown(f"""
     .stApp {{ background-color: {COLORS['fundo']}; color: {COLORS['grafite']}; }}
     h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
 
-    /* 1. ABA RECOLHIDA (EXPANDER) VERDE MATCHA */
+    /* 1. ABA DE CADASTRO (EXPANDER) - VOLTA PARA O CREME ORIGINAL */
     .stExpander {{
-        background-color: {COLORS['matcha']} !important;
-        border: none !important;
+        background-color: {COLORS['fundo']} !important;
+        border: 1px solid {COLORS['areia']} !important;
         border-radius: 12px !important;
+        box-shadow: none !important;
     }}
     .stExpander [data-testid="stExpanderSummary"] {{
-        color: white !important;
+        color: {COLORS['grafite']} !important;
     }}
     .stExpander [data-testid="stExpanderSummary"] svg {{
-        fill: white !important;
+        fill: {COLORS['grafite']} !important;
     }}
 
-    /* 2. CAMPOS DE ENTRADA (Cadastro) VERDE MATCHA */
-    /* Input de Texto, Data, Seleção e Número */
+    /* 2. CAMPOS DE ENTRADA (MANTÉM O VERDE MATCHA) */
     .stTextInput input, .stDateInput input, .stSelectbox [data-baseweb="select"], .stNumberInput input {{
         background-color: {COLORS['matcha']} !important;
         color: white !important;
@@ -54,31 +54,28 @@ st.markdown(f"""
         border-radius: 10px !important;
     }}
 
-    /* Placeholder do Nome do Remédio (Forçando visibilidade) */
+    /* Placeholder do Nome (Fonte Preta conforme pedido) */
     .stTextInput input::placeholder {{
         color: {COLORS['preto']} !important;
-        opacity: 0.8;
+        opacity: 0.9;
     }}
 
-    /* 3. CALENDÁRIO E BOTÕES DE +/- VERDE MATCHA */
-    /* Ajuste para botões de incremento do Number Input */
+    /* 3. BOTÕES DE CONTROLE (+/- E CALENDÁRIO) EM VERDE */
     .stNumberInput button {{
         background-color: {COLORS['matcha']} !important;
         color: white !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
     }}
     
-    /* 4. BOTÃO SALVAR REMÉDIO VERDE MATCHA */
+    /* 4. BOTÃO SALVAR (MANTÉM O VERDE) */
     form .stButton > button {{
         background-color: {COLORS['matcha']} !important;
         color: white !important;
         width: 100% !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        margin-top: 10px;
     }}
 
-    /* Títulos e Labels */
+    /* Labels e Títulos em Grafite */
     label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 700; }}
 
     /* Pills / Tabs */
@@ -92,6 +89,7 @@ st.markdown(f"""
         background-color: {COLORS['matcha']} !important;
         color: white !important;
     }}
+    [data-testid="stIcon"] {{ display: none !important; }}
 
     /* Estado Vazio */
     .empty-state {{ color: {COLORS['grafite']}; opacity: 0.4; text-align: center; padding: 30px; }}
@@ -121,25 +119,22 @@ st.title("💊 Farmacinha de Bolso")
 
 df, sha = load_data()
 
-# Botão de inclusão (Topo)
+# Incluir remédio no topo
 if st.button("➕ Incluir remédio", use_container_width=True):
     st.session_state.show_form = True
 
-# JORNADA DE CADASTRO
+# JORNADA DE CADASTRO (Aba Creme, Conteúdo Verde)
 if st.session_state.get("show_form"):
     with st.expander("📝 Novo Cadastro", expanded=True):
         with st.form("form_cadastro", clear_on_submit=True):
-            # Campo Nome com Placeholder solicitado
             nome_f = st.text_input("Nome do medicamento", placeholder="Digite o nome do seu remédio")
             
             c1, c2 = st.columns(2)
-            val_f = c1.date_input("Vencimento") # Calendário agora herdará o estilo Matcha
-            qtd_f = c2.number_input("Quantidade", min_value=1, step=1) # Botões +/- agora Matcha
+            val_f = c1.date_input("Vencimento") 
+            qtd_f = c2.number_input("Quantidade", min_value=1, step=1)
             
-            # Selectbox agora Matcha
             cat_f = st.selectbox("Motivo (Categoria)", ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"])
             
-            # Botão Salvar Verde Matcha
             if st.form_submit_button("Salvar remédio"):
                 new_row = {"nome": nome_f, "validade": str(val_f), "quantidade": int(qtd_f), "motivo": cat_f}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -166,9 +161,10 @@ for idx, cat_name in enumerate(categorias):
             st.markdown(f'<div class="empty-state">Nenhum remédio em {cat_name}.</div>', unsafe_allow_html=True)
         else:
             # Cabeçalho da Listagem
-            h1, h2, h3, h4, h5 = st.columns([2.5, 1.5, 1, 1.5, 1.5])
-            for h, title in zip([h1, h2, h3, h4, h5], ["Medicamento", "Categoria", "Estoque", "Validade", "Ações"]):
-                h.markdown(f'<div style="font-size:0.7rem; font-weight:700; opacity:0.5; text-transform:uppercase;">{title}</div>', unsafe_allow_html=True)
+            h_cols = st.columns([2.5, 1.5, 1, 1.5, 1.5])
+            headers = ["Medicamento", "Categoria", "Estoque", "Validade", "Ações"]
+            for h, text in zip(h_cols, headers):
+                h.markdown(f'<div style="font-size:0.7rem; font-weight:700; opacity:0.5; text-transform:uppercase;">{text}</div>', unsafe_allow_html=True)
 
             for i, r in subset.iterrows():
                 row = st.columns([2.5, 1.5, 1, 1.5, 1.5])
