@@ -19,13 +19,159 @@ model = get_ai_model()
 
 # --- 2. PALETA ZEN (MATCHA & CREAM) ---
 COLORS = {
-    "fundo":   "#F9F7F2",  # Creme Papel
-    "matcha":  "#587058",  # Verde Matcha
-    "areia":   "#E8D5C4",  # Bege Areia
-    "grafite": "#2C2C2C",  # Texto principal
-    "branco":  "#FFFFFF",
-    "matcha_claro": "#EAF0EA",  # Verde muito suave p/ hover/backgrounds sutis
+    "fundo":        "#F9F7F2",
+    "matcha":       "#587058",
+    "areia":        "#E8D5C4",
+    "grafite":      "#2C2C2C",
+    "branco":       "#FFFFFF",
+    "matcha_claro": "#EAF0EA",
 }
+
+st.markdown(f"""
+    <style>
+    :root, html, body, .stApp {{
+        color-scheme: light only !important;
+        background-color: {COLORS['fundo']} !important;
+        color: {COLORS['grafite']} !important;
+    }}
+
+    [data-testid="stHeader"] {{
+        background-color: {COLORS['fundo']} !important;
+    }}
+
+    h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
+    label {{ color: {COLORS['grafite']} !important; font-weight: 600; }}
+
+    .stButton > button,
+    .stButton > button:hover,
+    .stButton > button:focus,
+    .stButton > button:active {{
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }}
+
+    .stTextInput input,
+    .stNumberInput input,
+    .stDateInput input,
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stDateInput input:focus {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: 1.5px solid transparent !important;
+        border-radius: 10px !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }}
+    .stTextInput input:focus,
+    .stNumberInput input:focus {{
+        border-color: {COLORS['matcha']} !important;
+    }}
+    .stTextInput input::placeholder,
+    .stNumberInput input::placeholder {{
+        color: {COLORS['grafite']} !important;
+        opacity: 0.45;
+    }}
+
+    .stSelectbox [data-baseweb="select"] > div,
+    .stSelectbox [data-baseweb="select"] > div:focus-within {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: 1.5px solid transparent !important;
+        border-radius: 10px !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }}
+    [data-baseweb="popover"] [data-baseweb="menu"] {{
+        background-color: {COLORS['fundo']} !important;
+        border: 1px solid {COLORS['areia']} !important;
+        border-radius: 10px !important;
+    }}
+    [data-baseweb="popover"] [role="option"] {{
+        color: {COLORS['grafite']} !important;
+        background-color: {COLORS['fundo']} !important;
+    }}
+    [data-baseweb="popover"] [role="option"]:hover {{
+        background-color: {COLORS['matcha_claro']} !important;
+        color: {COLORS['matcha']} !important;
+    }}
+
+    .stNumberInput button,
+    .stNumberInput button:hover {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        border-radius: 8px !important;
+    }}
+    .stNumberInput button:hover {{
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
+    }}
+
+    [data-testid="stExpander"] {{
+        background-color: {COLORS['fundo']} !important;
+        border: 1.5px solid {COLORS['areia']} !important;
+        border-radius: 14px !important;
+        box-shadow: none !important;
+    }}
+    [data-testid="stExpander"] > details > summary {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border-radius: 12px !important;
+        outline: none !important;
+    }}
+    [data-testid="stExpanderDetails"] {{
+        background-color: {COLORS['fundo']} !important;
+    }}
+
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+    }}
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{ display: none; }}
+    .stTabs [data-baseweb="tab"] {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border-radius: 50px !important;
+        border: none !important;
+        font-weight: 600;
+        white-space: nowrap;
+        padding: 6px 16px !important;
+    }}
+    .stTabs [aria-selected="true"] {{
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
+    }}
+    .stTabs [data-baseweb="tab-highlight"],
+    .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
+    [data-testid="stIcon"] {{ display: none !important; }}
+
+    hr {{ border-color: {COLORS['areia']} !important; opacity: 0.6; }}
+
+    .empty-state {{
+        opacity: 0.35;
+        text-align: center;
+        padding: 30px 0;
+        font-size: 0.9rem;
+    }}
+    .col-header {{
+        font-size: 0.68rem;
+        font-weight: 700;
+        opacity: 0.45;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }}
+    </style>
+""", unsafe_allow_html=True)
 
 st.markdown(f"""
     <style>
