@@ -12,87 +12,212 @@ def get_ai_model():
     try:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         return genai.GenerativeModel('gemini-1.5-flash')
-    except: return None
+    except:
+        return None
 
 model = get_ai_model()
 
-# --- 2. PALETA ZEN (MATCH & CREAM) ---
+# --- 2. PALETA ZEN (MATCHA & CREAM) ---
 COLORS = {
-    "fundo": "#F9F7F2",       # Creme Papel (Original)
-    "matcha": "#587058",      # Verde Matcha
-    "areia": "#E8D5C4",       # Bege Areia
-    "grafite": "#2C2C2C",     # Texto
-    "branco": "#FFFFFF",
-    "preto": "#000000"
+    "fundo":   "#F9F7F2",  # Creme Papel
+    "matcha":  "#587058",  # Verde Matcha
+    "areia":   "#E8D5C4",  # Bege Areia
+    "grafite": "#2C2C2C",  # Texto principal
+    "branco":  "#FFFFFF",
+    "matcha_claro": "#EAF0EA",  # Verde muito suave p/ hover/backgrounds sutis
 }
 
 st.markdown(f"""
     <style>
-    /* Reset Global */
-    .stApp {{ background-color: {COLORS['fundo']}; color: {COLORS['grafite']}; }}
-    h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
+    /* ── RESET GLOBAL ─────────────────────────────── */
+    .stApp {{
+        background-color: {COLORS['fundo']};
+        color: {COLORS['grafite']};
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }}
 
-    /* 1. ABA DE CADASTRO (EXPANDER) - VOLTA PARA O CREME ORIGINAL */
+    /* ── TIPOGRAFIA ───────────────────────────────── */
+    h1 {{
+        color: {COLORS['matcha']} !important;
+        font-weight: 800 !important;
+    }}
+    label, .titulo-lista {{
+        color: {COLORS['grafite']} !important;
+        font-weight: 600;
+    }}
+
+    /* ── EXPANDER (FORMULÁRIO DE CADASTRO) ────────── */
+    /* Fundo creme para não pesar */
     .stExpander {{
         background-color: {COLORS['fundo']} !important;
-        border: 1px solid {COLORS['areia']} !important;
-        border-radius: 12px !important;
+        border: 1.5px solid {COLORS['areia']} !important;
+        border-radius: 14px !important;
         box-shadow: none !important;
     }}
     .stExpander [data-testid="stExpanderSummary"] {{
         color: {COLORS['grafite']} !important;
+        font-weight: 600;
     }}
     .stExpander [data-testid="stExpanderSummary"] svg {{
-        fill: {COLORS['grafite']} !important;
+        fill: {COLORS['matcha']} !important;
+    }}
+    /* Conteúdo interno do expander também creme */
+    .stExpander [data-testid="stExpanderDetails"] {{
+        background-color: {COLORS['fundo']} !important;
     }}
 
-    /* 2. CAMPOS DE ENTRADA (MANTÉM O VERDE MATCHA) */
-    .stTextInput input, .stDateInput input, .stSelectbox [data-baseweb="select"], .stNumberInput input {{
-        background-color: {COLORS['matcha']} !important;
-        color: white !important;
-        border: none !important;
+    /* ── CAMPOS DE ENTRADA ────────────────────────── */
+    /* Fundo AREIA + texto GRAFITE = legível e harmonioso */
+    .stTextInput input,
+    .stNumberInput input,
+    .stDateInput input {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: 1.5px solid transparent !important;
+        border-radius: 10px !important;
+        caret-color: {COLORS['matcha']};
+    }}
+    /* Placeholder: grafite suavizado (acessível) */
+    .stTextInput input::placeholder,
+    .stNumberInput input::placeholder,
+    .stDateInput input::placeholder {{
+        color: {COLORS['grafite']} !important;
+        opacity: 0.45;
+    }}
+    /* Focus ring: matcha sutil */
+    .stTextInput input:focus,
+    .stNumberInput input:focus,
+    .stDateInput input:focus {{
+        border-color: {COLORS['matcha']} !important;
+        box-shadow: 0 0 0 3px rgba(88,112,88,0.15) !important;
+        outline: none !important;
+    }}
+
+    /* ── SELECTBOX ────────────────────────────────── */
+    .stSelectbox [data-baseweb="select"] > div {{
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: 1.5px solid transparent !important;
         border-radius: 10px !important;
     }}
-
-    /* Placeholder do Nome (Fonte Preta conforme pedido) */
-    .stTextInput input::placeholder {{
-        color: {COLORS['preto']} !important;
-        opacity: 0.9;
+    /* Dropdown do selectbox */
+    [data-baseweb="popover"] [data-baseweb="menu"] {{
+        background-color: {COLORS['fundo']} !important;
+        border: 1px solid {COLORS['areia']} !important;
+        border-radius: 10px !important;
+    }}
+    [data-baseweb="popover"] [role="option"] {{
+        color: {COLORS['grafite']} !important;
+    }}
+    [data-baseweb="popover"] [role="option"]:hover,
+    [data-baseweb="popover"] [aria-selected="true"] {{
+        background-color: {COLORS['matcha_claro']} !important;
+        color: {COLORS['matcha']} !important;
+        font-weight: 600;
     }}
 
-    /* 3. BOTÕES DE CONTROLE (+/- E CALENDÁRIO) EM VERDE */
+    /* ── BOTÕES +/- DO NUMBER INPUT ───────────────── */
     .stNumberInput button {{
-        background-color: {COLORS['matcha']} !important;
-        color: white !important;
+        background-color: {COLORS['areia']} !important;
+        color: {COLORS['grafite']} !important;
+        border: none !important;
+        border-radius: 8px !important;
     }}
-    
-    /* 4. BOTÃO SALVAR (MANTÉM O VERDE) */
-    form .stButton > button {{
+    .stNumberInput button:hover {{
         background-color: {COLORS['matcha']} !important;
-        color: white !important;
+        color: {COLORS['branco']} !important;
+    }}
+
+    /* ── BOTÃO SALVAR (PRIMÁRIO) ──────────────────── */
+    form .stButton > button,
+    form .stButton > button:hover {{
+        background-color: {COLORS['matcha']} !important;
+        color: {COLORS['branco']} !important;
         width: 100% !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
+        border: none !important;
+        padding: 0.6rem 0 !important;
+        transition: opacity 0.2s ease;
+    }}
+    form .stButton > button:hover {{
+        opacity: 0.88;
     }}
 
-    /* Labels e Títulos em Grafite */
-    label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 700; }}
+    /* ── BOTÃO "INCLUIR REMÉDIO" (SECUNDÁRIO) ─────── */
+    /* Fora do form — contorno matcha, fundo creme */
+    [data-testid="stBaseButton-secondary"],
+    div:not(form) > div > .stButton > button {{
+        background-color: {COLORS['fundo']} !important;
+        color: {COLORS['matcha']} !important;
+        border: 1.5px solid {COLORS['matcha']} !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+    }}
+    div:not(form) > div > .stButton > button:hover {{
+        background-color: {COLORS['matcha_claro']} !important;
+    }}
 
-    /* Pills / Tabs */
-    .stTabs [data-baseweb="tab-list"] {{ gap: 10px; }}
+    /* ── TABS / PILLS ─────────────────────────────── */
+    /* Scroll horizontal sem chevrons */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        scrollbar-width: none;       /* Firefox */
+    }}
+    .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{
+        display: none;               /* Chrome/Safari */
+    }}
+    /* Pill inativa */
     .stTabs [data-baseweb="tab"] {{
         background-color: {COLORS['areia']} !important;
-        border-radius: 50px !important;
         color: {COLORS['grafite']} !important;
+        border-radius: 50px !important;
+        border: none !important;
+        font-weight: 600;
+        white-space: nowrap;
+        padding: 6px 16px !important;
     }}
+    /* Pill ativa */
     .stTabs [aria-selected="true"] {{
         background-color: {COLORS['matcha']} !important;
-        color: white !important;
+        color: {COLORS['branco']} !important;
     }}
-    [data-testid="stIcon"] {{ display: none !important; }}
+    /* Remove indicador de linha padrão do Streamlit */
+    .stTabs [data-baseweb="tab-highlight"] {{
+        display: none !important;
+    }}
+    /* Oculta ícones de chevron das tabs */
+    [data-testid="stIcon"] {{
+        display: none !important;
+    }}
 
-    /* Estado Vazio */
-    .empty-state {{ color: {COLORS['grafite']}; opacity: 0.4; text-align: center; padding: 30px; }}
+    /* ── DIVIDER ──────────────────────────────────── */
+    hr {{
+        border-color: {COLORS['areia']} !important;
+        opacity: 0.6;
+    }}
+
+    /* ── ESTADO VAZIO ─────────────────────────────── */
+    .empty-state {{
+        color: {COLORS['grafite']};
+        opacity: 0.35;
+        text-align: center;
+        padding: 30px 0;
+        font-size: 0.9rem;
+    }}
+
+    /* ── CABEÇALHO DA LISTA ───────────────────────── */
+    .col-header {{
+        font-size: 0.68rem;
+        font-weight: 700;
+        opacity: 0.45;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: {COLORS['grafite']};
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -110,84 +235,118 @@ def save_data(df, sha, msg="Remédio salvo!"):
     g = Github(st.secrets["GITHUB_TOKEN"])
     repo = g.get_repo(st.secrets["REPO_NAME"])
     csv_data = df.to_csv(index=False)
-    if sha: repo.update_file("dados_remedios.csv", "Sync", csv_data, sha)
-    else: repo.create_file("dados_remedios.csv", "Init", csv_data)
+    if sha:
+        repo.update_file("dados_remedios.csv", "Sync", csv_data, sha)
+    else:
+        repo.create_file("dados_remedios.csv", "Init", csv_data)
     st.toast(msg)
 
-# --- 4. INTERFACE ---
+# --- 4. HELPER: STATUS DE VALIDADE ---
+def validade_badge(val_str):
+    """Retorna texto de status baseado na data de validade."""
+    try:
+        dt = datetime.strptime(val_str, '%Y-%m-%d').date()
+        hoje = date.today()
+        diff = (dt - hoje).days
+        if diff < 0:
+            return "Vencido 🚨", "#E53E3E"   # Vermelho
+        elif diff <= 30:
+            return "Atenção ⚠️", "#D97706"   # Âmbar
+        else:
+            return "Em dia ✅", "#587058"     # Matcha
+    except:
+        return "—", COLORS['grafite']
+
+# --- 5. INTERFACE ---
 st.title("💊 Farmacinha de Bolso")
 
 df, sha = load_data()
 
-# Incluir remédio no topo
+# Botão de entrada
 if st.button("➕ Incluir remédio", use_container_width=True):
-    st.session_state.show_form = True
+    st.session_state.show_form = not st.session_state.get("show_form", False)
 
-# JORNADA DE CADASTRO (Aba Creme, Conteúdo Verde)
+# Formulário de cadastro
 if st.session_state.get("show_form"):
     with st.expander("📝 Novo Cadastro", expanded=True):
         with st.form("form_cadastro", clear_on_submit=True):
             nome_f = st.text_input("Nome do medicamento", placeholder="Digite o nome do seu remédio")
-            
             c1, c2 = st.columns(2)
-            val_f = c1.date_input("Vencimento") 
-            qtd_f = c2.number_input("Quantidade", min_value=1, step=1)
-            
-            cat_f = st.selectbox("Motivo (Categoria)", ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"])
-            
+            val_f  = c1.date_input("Vencimento")
+            qtd_f  = c2.number_input("Quantidade", min_value=1, step=1)
+            cat_f  = st.selectbox("Motivo (Categoria)", [
+                "Gases", "Diarréia", "Dor de cabeça",
+                "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"
+            ])
             if st.form_submit_button("Salvar remédio"):
-                new_row = {"nome": nome_f, "validade": str(val_f), "quantidade": int(qtd_f), "motivo": cat_f}
+                new_row = {
+                    "nome": nome_f,
+                    "validade": str(val_f),
+                    "quantidade": int(qtd_f),
+                    "motivo": cat_f
+                }
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                save_data(df, sha, "Remédio salvo!")
+                save_data(df, sha, "Remédio salvo! 💊")
                 st.session_state.show_form = False
                 st.rerun()
 
 st.divider()
 
-# Busca
-busca = st.text_input("Qual remédio você procura?", placeholder="Digite o nome...")
+# Campo de busca
+busca = st.text_input("🔍 Buscar remédio", placeholder="Digite o nome...")
 
 st.markdown('<p class="titulo-lista">Lista de remédios</p>', unsafe_allow_html=True)
 
+# Tabs por categoria
 categorias = ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"]
 tabs = st.tabs(categorias)
 
 for idx, cat_name in enumerate(categorias):
     with tabs[idx]:
         subset = df[df['motivo'] == cat_name] if not df.empty else pd.DataFrame()
-        if busca: subset = subset[subset['nome'].str.contains(busca, case=False, na=False)]
-        
+        if busca:
+            subset = subset[subset['nome'].str.contains(busca, case=False, na=False)]
+
         if subset.empty:
-            st.markdown(f'<div class="empty-state">Nenhum remédio em {cat_name}.</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="empty-state">Nenhum remédio em <strong>{cat_name}</strong>.</div>', unsafe_allow_html=True)
         else:
-            # Cabeçalho da Listagem
-            h_cols = st.columns([2.5, 1.5, 1, 1.5, 1.5])
-            headers = ["Medicamento", "Categoria", "Estoque", "Validade", "Ações"]
-            for h, text in zip(h_cols, headers):
-                h.markdown(f'<div style="font-size:0.7rem; font-weight:700; opacity:0.5; text-transform:uppercase;">{text}</div>', unsafe_allow_html=True)
+            # Cabeçalho da tabela invisível
+            h_cols = st.columns([2.5, 1, 1.5, 1.5])
+            for text in ["Medicamento", "Estoque", "Validade", "Ações"]:
+                h_cols[["Medicamento", "Estoque", "Validade", "Ações"].index(text)].markdown(
+                    f'<div class="col-header">{text}</div>', unsafe_allow_html=True
+                )
 
             for i, r in subset.iterrows():
-                row = st.columns([2.5, 1.5, 1, 1.5, 1.5])
-                row[0].write(f"**{r['nome']}**")
-                row[1].write(r['motivo'])
-                row[2].write(f"{r['quantidade']} un")
-                
-                dt = datetime.strptime(r['validade'], '%Y-%m-%d').date()
-                row[3].write(dt.strftime('%d/%m/%Y'))
+                row = st.columns([2.5, 1, 1.5, 1.5])
 
-                acts = row[4].columns(3)
-                if acts[0].button("📓", key=f"bula_{i}"):
+                row[0].write(f"**{r['nome']}**")
+                row[1].write(f"{r['quantidade']} un")
+
+                # Status de validade com cor semântica
+                label, cor = validade_badge(r['validade'])
+                row[2].markdown(
+                    f'<span style="color:{cor}; font-weight:600; font-size:0.85rem;">{label}</span>',
+                    unsafe_allow_html=True
+                )
+
+                # Ações
+                acts = row[3].columns(3)
+
+                if acts[0].button("📓", key=f"bula_{i}", help="Ver bula"):
                     if model:
-                        with st.spinner("Consultando..."):
-                            res = model.generate_content(f"Resuma a bula de {r['nome']}.")
+                        with st.spinner("Consultando bula..."):
+                            res = model.generate_content(f"Resuma a bula de {r['nome']} em tópicos curtos.")
                             st.info(res.text)
-                
-                if acts[1].button("✏️", key=f"edit_{i}"):
+                    else:
+                        st.warning("IA não disponível.")
+
+                if acts[1].button("✏️", key=f"edit_{i}", help="Editar"):
                     st.session_state.edit_item = i
                     st.session_state.show_form = True
                     st.rerun()
-                
-                if acts[2].button("🗑️", key=f"del_{i}"):
-                    df = df.drop(i)
-                    save_data(df, sha, "Excluído!")
+
+                if acts[2].button("🗑️", key=f"del_{i}", help="Excluir"):
+                    df = df.drop(i).reset_index(drop=True)
+                    save_data(df, sha, "Remédio excluído.")
                     st.rerun()
