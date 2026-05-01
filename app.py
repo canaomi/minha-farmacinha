@@ -42,6 +42,7 @@ st.markdown(f"""
     h1 {{ color: {COLORS['matcha']} !important; font-weight: 800 !important; }}
     label, .titulo-lista {{ color: {COLORS['grafite']} !important; font-weight: 600; }}
 
+    /* ── TODOS OS BOTÕES ── */
     .stButton > button,
     .stButton > button:hover,
     .stButton > button:focus,
@@ -59,22 +60,19 @@ st.markdown(f"""
     .stButton > button:hover {{ opacity: 0.88 !important; }}
     .stButton > button:active {{ opacity: 0.75 !important; }}
 
-    [data-testid="stBaseButton-secondary"],
-    [data-testid="stBaseButton-secondary"]:hover,
-    [data-testid="stBaseButton-secondary"]:focus,
-    [data-testid="stBaseButton-secondary"]:active,
-    [data-testid="stBaseButton-secondary"]:focus-visible {{
+    /* ── MODAL / DIALOG ── */
+    [data-testid="stDialog"] {{
         background-color: {COLORS['fundo']} !important;
-        color: {COLORS['matcha']} !important;
-        border: 1.5px solid {COLORS['matcha']} !important;
-        outline: none !important;
-        box-shadow: none !important;
-        opacity: 1 !important;
+        border-radius: 20px !important;
+        border: 1.5px solid {COLORS['areia']} !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
     }}
-    [data-testid="stBaseButton-secondary"]:hover {{
-        background-color: {COLORS['matcha_claro']} !important;
+    [data-testid="stDialog"] h2 {{
+        color: {COLORS['matcha']} !important;
+        font-weight: 800 !important;
     }}
 
+    /* ── EXPANDER ── */
     [data-testid="stExpander"] {{
         background-color: {COLORS['fundo']} !important;
         border: 1.5px solid {COLORS['areia']} !important;
@@ -104,6 +102,7 @@ st.markdown(f"""
         border-radius: 0 0 14px 14px !important;
     }}
 
+    /* ── CAMPOS DE ENTRADA ── */
     .stTextInput input,
     .stNumberInput input,
     .stDateInput input,
@@ -150,6 +149,7 @@ st.markdown(f"""
         background-color: transparent !important;
     }}
 
+    /* ── SELECTBOX ── */
     .stSelectbox [data-baseweb="select"] > div,
     .stSelectbox [data-baseweb="select"] > div:hover,
     .stSelectbox [data-baseweb="select"] > div:focus,
@@ -183,6 +183,7 @@ st.markdown(f"""
         font-weight: 600;
     }}
 
+    /* ── BOTÕES +/- ── */
     .stNumberInput button,
     .stNumberInput button:hover,
     .stNumberInput button:focus,
@@ -199,6 +200,7 @@ st.markdown(f"""
         color: {COLORS['branco']} !important;
     }}
 
+    /* ── TABS / PILLS ── */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 8px;
         overflow-x: auto;
@@ -283,43 +285,53 @@ def validade_badge(val_str):
     except:
         return "—", COLORS['grafite']
 
-# --- 5. INTERFACE ---
-st.title("💊 Farmacinha de Bolso")
+# --- 5. MODAL DE CADASTRO ---
+@st.dialog("💊 Novo Remédio")
+def modal_cadastro():
+    with st.form("form_cadastro", clear_on_submit=True):
+        nome_f = st.text_input("Nome do medicamento", placeholder="Digite o nome do seu remédio")
+        c1, c2 = st.columns(2)
+        val_f  = c1.date_input("Vencimento")
+        qtd_f  = c2.number_input("Quantidade", min_value=1, step=1)
+        cat_f  = st.selectbox("Motivo (Categoria)", [
+            "Gases", "Diarréia", "Dor de cabeça",
+            "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"
+        ])
+        if st.form_submit_button("Salvar remédio", use_container_width=True):
+            if not nome_f.strip():
+                st.warning("Digite o nome do medicamento.")
+                return
+            df, sha = load_data()
+            new_row = {
+                "nome": nome_f.strip(),
+                "validade": str(val_f),
+                "quantidade": int(qtd_f),
+                "motivo": cat_f
+            }
+            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            save_data(df, sha, "Remédio salvo! 💊")
+            st.rerun()
 
+# --- 6. INTERFACE ---
 df, sha = load_data()
 
-if st.button("➕ Incluir remédio", use_container_width=True):
-    st.session_state.show_form = not st.session_state.get("show_form", False)
-
-if st.session_state.get("show_form"):
-    with st.expander("📝 Novo Cadastro", expanded=True):
-        with st.form("form_cadastro", clear_on_submit=True):
-            nome_f = st.text_input("Nome do medicamento", placeholder="Digite o nome do seu remédio")
-            c1, c2 = st.columns(2)
-            val_f  = c1.date_input("Vencimento")
-            qtd_f  = c2.number_input("Quantidade", min_value=1, step=1)
-            cat_f  = st.selectbox("Motivo (Categoria)", [
-                "Gases", "Diarréia", "Dor de cabeça",
-                "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"
-            ])
-            if st.form_submit_button("Salvar remédio"):
-                new_row = {
-                    "nome": nome_f,
-                    "validade": str(val_f),
-                    "quantidade": int(qtd_f),
-                    "motivo": cat_f
-                }
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                save_data(df, sha, "Remédio salvo! 💊")
-                st.session_state.show_form = False
-                st.rerun()
+# ── Cabeçalho: título + botão alinhados ──
+col_titulo, col_botao = st.columns([6, 1])
+with col_titulo:
+    st.title("💊 Farmacinha de Bolso")
+with col_botao:
+    st.markdown("<div style='padding-top:18px'>", unsafe_allow_html=True)
+    if st.button("➕ Incluir", use_container_width=True):
+        modal_cadastro()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 st.divider()
 
+# ── Busca ──
 busca = st.text_input("🔍 Buscar remédio", placeholder="Digite o nome...")
-
 st.markdown('<p class="titulo-lista">Lista de remédios</p>', unsafe_allow_html=True)
 
+# ── Tabs por categoria ──
 categorias = ["Gases", "Diarréia", "Dor de cabeça", "Gripe", "Antiinflamatório", "Dor de estômago", "Outros"]
 tabs = st.tabs(categorias)
 
@@ -340,7 +352,6 @@ for idx, cat_name in enumerate(categorias):
 
             for i, r in subset.iterrows():
                 row = st.columns([2.5, 1, 1.5, 1.5])
-
                 row[0].write(f"**{r['nome']}**")
                 row[1].write(f"{r['quantidade']} un")
 
@@ -352,7 +363,7 @@ for idx, cat_name in enumerate(categorias):
 
                 acts = row[3].columns(3)
 
-                # 📓 BULA — com tratamento de erro amigável
+                # 📓 BULA
                 if acts[0].button("📓", key=f"bula_{i}", help="Ver bula"):
                     if model:
                         with st.spinner("Consultando bula..."):
@@ -370,11 +381,12 @@ for idx, cat_name in enumerate(categorias):
                     else:
                         st.warning("⚙️ IA não configurada.")
 
+                # ✏️ EDITAR
                 if acts[1].button("✏️", key=f"edit_{i}", help="Editar"):
                     st.session_state.edit_item = i
-                    st.session_state.show_form = True
                     st.rerun()
 
+                # 🗑️ EXCLUIR
                 if acts[2].button("🗑️", key=f"del_{i}", help="Excluir"):
                     df = df.drop(i).reset_index(drop=True)
                     save_data(df, sha, "Remédio excluído.")
